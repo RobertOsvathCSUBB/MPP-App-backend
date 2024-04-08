@@ -1,0 +1,6 @@
+@mpp_app_backend_HostAddress = http://localhost:5194
+
+GET {{mpp_app_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
