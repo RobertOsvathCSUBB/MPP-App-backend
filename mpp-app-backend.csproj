@@ -9,11 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Bogus" Version="35.5.0" />
+    <PackageReference Include="Microsoft.CodeCoverage" Version="17.9.0" />
+    <PackageReference Include="PDFsharp" Version="6.0.0" />
+    <PackageReference Include="ReportGenerator" Version="5.2.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Tests\" />
+    <PackageReference Include="xunit.assert" Version="2.7.0" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.7.0" />
   </ItemGroup>
 
 </Project>

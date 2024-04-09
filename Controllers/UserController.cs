@@ -2,11 +2,13 @@
 using mpp_app_backend.Models;
 using mpp_app_backend.Interfaces;
 using mpp_app_backend.Exceptions;
+using Microsoft.AspNetCore.Cors;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace mpp_app_backend.Controllers
 {
+    [EnableCors("AllowFrontendOrigin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -71,6 +73,7 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
+            user.ID = Guid.NewGuid().ToString();
             _userRepository.AddUser(user);
 
             return CreatedAtAction("GetUserById", new { id = user.ID }, user);

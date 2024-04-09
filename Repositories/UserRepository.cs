@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
-using mpp_app_backend.Models;
+﻿using mpp_app_backend.Models;
 using mpp_app_backend.Interfaces;
-using System.Linq;
 using mpp_app_backend.Exceptions;
-using Microsoft.AspNetCore.Cors;
 
 namespace mpp_app_backend.Repositories
 {
-    [EnableCors("AllowFrontendOrigin")]
     public class UserRepository : IUserRepository
     {
         private ICollection<User> _users;

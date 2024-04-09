@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mpp-app-backend", "mpp-app-backend.csproj", "{C28877EA-0EF9-49D7-BB6D-ACFB1C609C81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mpp-app-backend", "mpp-app-backend.csproj", "{C28877EA-0EF9-49D7-BB6D-ACFB1C609C81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mpp-app-backend-test", "..\mpp-app-backend-test\mpp-app-backend-test.csproj", "{547974FE-026A-4BB7-A445-34CE4E15EB84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C28877EA-0EF9-49D7-BB6D-ACFB1C609C81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C28877EA-0EF9-49D7-BB6D-ACFB1C609C81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C28877EA-0EF9-49D7-BB6D-ACFB1C609C81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{547974FE-026A-4BB7-A445-34CE4E15EB84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{547974FE-026A-4BB7-A445-34CE4E15EB84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{547974FE-026A-4BB7-A445-34CE4E15EB84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{547974FE-026A-4BB7-A445-34CE4E15EB84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
