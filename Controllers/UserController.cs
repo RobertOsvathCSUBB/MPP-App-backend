@@ -3,6 +3,7 @@ using mpp_app_backend.Models;
 using mpp_app_backend.Interfaces;
 using mpp_app_backend.Exceptions;
 using Microsoft.AspNetCore.Cors;
+using mpp_app_backend.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,11 +14,13 @@ namespace mpp_app_backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly UserServices _userServices;
 
-        public UserController(IUserRepository repo)
+        public UserController(IUserRepository repo, UserServices serv)
         {
             _userRepository = repo;
+            _userServices = serv;
         }
 
         // GET: api/<UserController>
@@ -133,6 +136,20 @@ namespace mpp_app_backend.Controllers
                 Console.WriteLine(e.Message);
                 return BadRequest();
             }
+        }
+
+        // GET api/<UserController>/getUsersPerYear
+        [HttpGet("getUsersPerYear")]
+        [ProducesResponseType(200, Type = typeof(IDictionary<int, int>))]
+        public IActionResult GetUsersPerYear()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var usersPerYear = _userServices.GetNumberOfUsersByRegistrationYear();
+            return Ok(usersPerYear);
         }
     }
 }
