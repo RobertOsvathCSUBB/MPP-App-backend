@@ -6,21 +6,23 @@ using mpp_app_backend.Services;
 using mpp_app_backend.Health;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
-using Microsoft.AspNetCore.WebSockets;
 using mpp_app_backend.Hubs;
+using mpp_app_backend.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Proxies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddTransient<Seed>();
 builder.Services.AddHealthChecks()
     .AddCheck<InternetHealthCheck>("InternetHealthCheck");
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<ICollection<User>>(new List<User>());
-builder.Services.AddSingleton<IUserRepository, UserRepository>();
-builder.Services.AddSingleton<UserServices>();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ILoginActivityRepository, LoginActivityRepository>();
+builder.Services.AddScoped<UserServices>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
@@ -34,10 +36,26 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-
-Seed.SeedUsers(builder.Services);
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseLazyLoadingProxies();
+});
 
 var app = builder.Build();
+
+if (args.Length == 1 && args[0] == "seeddata")
+    SeedDataContext(app);
+
+void SeedDataContext(IHost app)
+{
+    var scopedFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var seed = scope.ServiceProvider.GetRequiredService<Seed>();
+        seed.SeedDataContext();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,6 +77,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<DataRefreshHub>("/hub");
+//app.MapHub<DataRefreshHub>("/hub");
 
 app.Run();

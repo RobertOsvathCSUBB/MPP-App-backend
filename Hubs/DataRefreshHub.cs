@@ -12,20 +12,30 @@ namespace mpp_app_backend.Hubs
     public class DataRefreshHub : Hub
     {
         private readonly IUserRepository _userRepository;
-        private readonly Faker<User> _userFaker;
+        private readonly Faker<User> usersFaker;
+        private readonly Faker<LoginActivity> loginActivitiesFaker;
         private TimeSpan newUserInterval = TimeSpan.FromSeconds(10);
 
         public DataRefreshHub(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _userFaker = new Faker<User>();
-            _userFaker.RuleFor(user => user.ID, fake => fake.Random.Uuid().ToString());
-            _userFaker.RuleFor(user => user.Username, fake => fake.Internet.UserName());
-            _userFaker.RuleFor(user => user.Email, fake => fake.Internet.Email());
-            _userFaker.RuleFor(user => user.Password, fake => fake.Internet.Password());
-            _userFaker.RuleFor(user => user.Avatar, fake => fake.Internet.Avatar());
-            _userFaker.RuleFor(user => user.Birthdate, fake => fake.Date.Past());
-            _userFaker.RuleFor(user => user.RegisteredAt, fake => fake.Date.Past());
+
+            loginActivitiesFaker = new Faker<LoginActivity>();
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Uuid().ToString());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.Time, fake => fake.Date.Past());
+            loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Latitude, fake => fake.Random.Double());
+            loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Longitude, fake => fake.Random.Double());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.IP, fake => fake.Internet.Ip());
+
+            usersFaker = new Faker<User>();
+            usersFaker.RuleFor(user => user.ID, fake => fake.Random.Uuid().ToString());
+            usersFaker.RuleFor(user => user.Username, fake => fake.Internet.UserName());
+            usersFaker.RuleFor(user => user.Email, fake => fake.Internet.Email());
+            usersFaker.RuleFor(user => user.Password, fake => fake.Internet.Password());
+            usersFaker.RuleFor(user => user.Avatar, fake => fake.Internet.Avatar());
+            usersFaker.RuleFor(user => user.Birthdate, fake => fake.Date.Past());
+            usersFaker.RuleFor(user => user.RegisteredAt, fake => fake.Date.Past());
+            usersFaker.RuleFor(user => user.LoginActivities, loginActivitiesFaker.Generate(3));
         }
 
         public override async Task OnConnectedAsync()
@@ -38,7 +48,7 @@ namespace mpp_app_backend.Hubs
             while (true)
             {
                 await Task.Delay(newUserInterval);
-                var newUser = _userFaker.Generate();
+                var newUser = usersFaker.Generate();
                 _userRepository.AddUser(newUser);
                 var serializerSettings = new JsonSerializerSettings();
                 serializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

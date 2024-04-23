@@ -4,6 +4,7 @@ using mpp_app_backend.Interfaces;
 using mpp_app_backend.Exceptions;
 using Microsoft.AspNetCore.Cors;
 using mpp_app_backend.Services;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,11 +16,13 @@ namespace mpp_app_backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILoginActivityRepository _loginActivityRepository;
         private readonly UserServices _userServices;
 
-        public UserController(IUserRepository repo, UserServices serv)
+        public UserController(IUserRepository userRepo, ILoginActivityRepository laRepo, UserServices serv)
         {
-            _userRepository = repo;
+            _userRepository = userRepo;
+            _loginActivityRepository = laRepo;
             _userServices = serv;
         }
 
@@ -37,6 +40,21 @@ namespace mpp_app_backend.Controllers
             return Ok(users);
         }
 
+        // GET: api/<UserController>/sorted
+        [HttpGet]
+        [Route("sorted")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
+        public IActionResult GetUsersSorted()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var users = _userRepository.GetUsersSorted();
+            return Ok(users);
+        }
+
         // GET api/<UserController>/{id}
         [HttpGet("{id}")]
         [ProducesResponseType(200, Type = typeof(User))]
@@ -51,7 +69,6 @@ namespace mpp_app_backend.Controllers
             try
             {
                 var user = _userRepository.GetUserById(id);
-
                 return Ok(user);
             }
             catch (UserNotFoundException e)
@@ -59,7 +76,7 @@ namespace mpp_app_backend.Controllers
                 Console.WriteLine(e.Message);
                 return NotFound();
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return BadRequest();
@@ -76,8 +93,20 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            user.ID = Guid.NewGuid().ToString();
-            _userRepository.AddUser(user);
+            while (true)
+            {
+                try
+                {
+                    user.ID = Guid.NewGuid().ToString();
+                    _userRepository.AddUser(user);
+                    break;
+                }
+                catch (DbUpdateException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
+            }
 
             return CreatedAtAction("GetUserById", new { id = user.ID }, user);
         }
@@ -95,18 +124,19 @@ namespace mpp_app_backend.Controllers
 
             try
             {
-                _userRepository.UpdateUser(id, user.Username, user.Email, user.Password, user.Avatar, user.Birthdate, user.RegisteredAt);
+                user.ID = id;
+                _userRepository.UpdateUser(user);
                 return Ok();
             }
             catch (UserNotFoundException e)
             {
                 Console.WriteLine(e.Message);
-                return NotFound();
+                return NotFound(e.Message);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return BadRequest();
+                return BadRequest(e.Message);
             }
         }
 
@@ -129,12 +159,12 @@ namespace mpp_app_backend.Controllers
             catch (UserNotFoundException e)
             {
                 Console.WriteLine(e.Message);
-                return NotFound();
+                return NotFound(e.Message);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return BadRequest();
+                return BadRequest(e.InnerException.Message);
             }
         }
 

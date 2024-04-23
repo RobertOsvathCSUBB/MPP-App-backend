@@ -9,5 +9,6 @@
         public string Avatar { get; set; }
         public DateTime Birthdate { get; set; }
         public DateTime RegisteredAt { get; set; }
+        public virtual ICollection<LoginActivity>? LoginActivities { get; set; }
     }
 }

@@ -1,14 +1,27 @@
-﻿using Microsoft.AspNetCore.Builder;
-using mpp_app_backend.Models;
+﻿using mpp_app_backend.Models;
 using Bogus;
-using mpp_app_backend.Interfaces;
+using mpp_app_backend.Context;
 
 namespace mpp_app_backend
 {
     public class Seed
     {
-        public static void SeedUsers(IServiceCollection services)
+        private readonly DataContext _context;
+
+        public Seed(DataContext context)
         {
+            _context = context;
+        }
+
+        public void SeedDataContext()
+        {
+            var loginActivitiesFaker = new Faker<LoginActivity>();
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Uuid().ToString());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.Time, fake => fake.Date.Past());
+            loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Latitude, fake => fake.Random.Double());
+            loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Longitude, fake => fake.Random.Double());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.IP, fake => fake.Internet.Ip());
+
             var usersFaker = new Faker<User>();
             usersFaker.RuleFor(user => user.ID, fake => fake.Random.Uuid().ToString());
             usersFaker.RuleFor(user => user.Username, fake => fake.Internet.UserName());
@@ -17,12 +30,14 @@ namespace mpp_app_backend
             usersFaker.RuleFor(user => user.Avatar, fake => fake.Internet.Avatar());
             usersFaker.RuleFor(user => user.Birthdate, fake => fake.Date.Past());
             usersFaker.RuleFor(user => user.RegisteredAt, fake => fake.Date.Past());
+            usersFaker.RuleFor(user => user.LoginActivities, (fake, user) => loginActivitiesFaker.Generate(3));
 
-            var users = usersFaker.Generate(10);
-            var repository = services.BuildServiceProvider().GetService<IUserRepository>();
-            foreach (var user in users)
+            if (!_context.Users.Any())
             {
-                repository.AddUser(user);
+                var users = usersFaker.Generate(10);
+                Console.WriteLine(users);
+                _context.Users.AddRange(users);
+                _context.SaveChanges();
             }
         }
     }
