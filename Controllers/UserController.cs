@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Cors;
 using mpp_app_backend.Services;
 using Microsoft.EntityFrameworkCore;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace mpp_app_backend.Controllers
 {
     [EnableCors("AllowFrontendOrigin")]
@@ -37,6 +35,34 @@ namespace mpp_app_backend.Controllers
             }
 
             var users = _userRepository.GetUsers();
+            return Ok(users);
+        }
+
+        // GET: api/<UserController>/totalUsersCount
+        [HttpGet("totalUsersCount")]
+        [ProducesResponseType(200, Type = typeof(int))]
+        public IActionResult GetTotalUsersCount()
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var totalUsersCount = _userRepository.GetUsers().Count;
+            return Ok(totalUsersCount);
+        }
+
+        // GET: api/<UserController>/pages?page={page}&pageSize={pageSize}
+        [HttpGet("pages")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
+        public IActionResult GetUsersPaginated(int page, int pageSize)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var users = _userRepository.GetUsersPaginated(page, pageSize);
             return Ok(users);
         }
 
@@ -73,12 +99,10 @@ namespace mpp_app_backend.Controllers
             }
             catch (UserNotFoundException e)
             {
-                Console.WriteLine(e.Message);
                 return NotFound();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
                 return BadRequest();
             }
         }
@@ -103,7 +127,6 @@ namespace mpp_app_backend.Controllers
                 }
                 catch (DbUpdateException e)
                 {
-                    Console.WriteLine(e.Message);
                     continue;
                 }
             }
@@ -115,6 +138,7 @@ namespace mpp_app_backend.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public IActionResult UpdateUser(string id, [FromBody] User user)
         {   
             if (!ModelState.IsValid)
@@ -130,12 +154,10 @@ namespace mpp_app_backend.Controllers
             }
             catch (UserNotFoundException e)
             {
-                Console.WriteLine(e.Message);
                 return NotFound(e.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
                 return BadRequest(e.Message);
             }
         }
@@ -158,12 +180,10 @@ namespace mpp_app_backend.Controllers
             }
             catch (UserNotFoundException e)
             {
-                Console.WriteLine(e.Message);
                 return NotFound(e.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
                 return BadRequest(e.InnerException.Message);
             }
         }

@@ -2,6 +2,7 @@
 using mpp_app_backend.Interfaces;
 using mpp_app_backend.Exceptions;
 using mpp_app_backend.Context;
+using System.Linq;
 
 namespace mpp_app_backend.Repositories
 {
@@ -40,6 +41,11 @@ namespace mpp_app_backend.Repositories
         public ICollection<User> GetUsers()
         {
             return _context.Users.ToList();
+        }
+
+        public ICollection<User> GetUsersPaginated(int page, int pageSize)
+        {
+            return _context.Users.Skip(page * pageSize).Take(pageSize).ToList();
         }
 
         public ICollection<User> GetUsersSorted()

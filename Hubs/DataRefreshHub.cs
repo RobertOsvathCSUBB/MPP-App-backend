@@ -14,7 +14,7 @@ namespace mpp_app_backend.Hubs
         private readonly IUserRepository _userRepository;
         private readonly Faker<User> usersFaker;
         private readonly Faker<LoginActivity> loginActivitiesFaker;
-        private TimeSpan newUserInterval = TimeSpan.FromSeconds(10);
+        private TimeSpan newUserInterval = TimeSpan.FromSeconds(1);
 
         public DataRefreshHub(IUserRepository userRepository)
         {
@@ -35,7 +35,7 @@ namespace mpp_app_backend.Hubs
             usersFaker.RuleFor(user => user.Avatar, fake => fake.Internet.Avatar());
             usersFaker.RuleFor(user => user.Birthdate, fake => fake.Date.Past());
             usersFaker.RuleFor(user => user.RegisteredAt, fake => fake.Date.Past());
-            usersFaker.RuleFor(user => user.LoginActivities, loginActivitiesFaker.Generate(3));
+            usersFaker.RuleFor(user => user.LoginActivities, loginActivitiesFaker.Generate(10000));
         }
 
         public override async Task OnConnectedAsync()

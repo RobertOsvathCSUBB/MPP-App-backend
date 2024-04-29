@@ -34,7 +34,7 @@ namespace mpp_app_backend
 
             if (!_context.Users.Any())
             {
-                var users = usersFaker.Generate(10);
+                var users = usersFaker.Generate(100000);
                 Console.WriteLine(users);
                 _context.Users.AddRange(users);
                 _context.SaveChanges();

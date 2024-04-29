@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTransient<Seed>();
 builder.Services.AddHealthChecks()
-    .AddCheck<InternetHealthCheck>("InternetHealthCheck");
+    .AddCheck<HealthCheck>("HealthCheck");
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -62,6 +62,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseCors("AllowFrontendOrigin");
