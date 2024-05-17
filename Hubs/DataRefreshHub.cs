@@ -21,7 +21,7 @@ namespace mpp_app_backend.Hubs
             _userRepository = userRepository;
 
             loginActivitiesFaker = new Faker<LoginActivity>();
-            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Uuid().ToString());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Guid().ToString());
             loginActivitiesFaker.RuleFor(loginActivity => loginActivity.Time, fake => fake.Date.Past());
             loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Latitude, fake => fake.Random.Double());
             loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Longitude, fake => fake.Random.Double());

@@ -5,6 +5,7 @@ using mpp_app_backend.Exceptions;
 using Microsoft.AspNetCore.Cors;
 using mpp_app_backend.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mpp_app_backend.Controllers
 {
@@ -13,19 +14,16 @@ namespace mpp_app_backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ILoginActivityRepository _loginActivityRepository;
-        private readonly UserServices _userServices;
 
-        public UserController(IUserRepository userRepo, ILoginActivityRepository laRepo, UserServices serv)
+        private readonly IUserService _userServices;
+
+        public UserController(IUserService serv)
         {
-            _userRepository = userRepo;
-            _loginActivityRepository = laRepo;
             _userServices = serv;
         }
 
         // GET: api/<UserController>
-        [HttpGet]
+        [HttpGet, Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
         public IActionResult GetUsers()
         {
@@ -34,12 +32,12 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            var users = _userRepository.GetUsers();
+            var users = _userServices.GetUsers();
             return Ok(users);
         }
 
         // GET: api/<UserController>/totalUsersCount
-        [HttpGet("totalUsersCount")]
+        [HttpGet("totalUsersCount"), Authorize]
         [ProducesResponseType(200, Type = typeof(int))]
         public IActionResult GetTotalUsersCount()
         {
@@ -48,12 +46,12 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            var totalUsersCount = _userRepository.GetUsers().Count;
+            var totalUsersCount = _userServices.GetTotalUsersCount();
             return Ok(totalUsersCount);
         }
 
         // GET: api/<UserController>/pages?page={page}&pageSize={pageSize}
-        [HttpGet("pages")]
+        [HttpGet("pages"), Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
         public IActionResult GetUsersPaginated(int page, int pageSize)
         {
@@ -62,13 +60,13 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            var users = _userRepository.GetUsersPaginated(page, pageSize);
+            var users = _userServices.GetUsersPaginated(page, pageSize);
             return Ok(users);
         }
 
         // GET: api/<UserController>/sorted
         [HttpGet]
-        [Route("sorted")]
+        [Route("sorted"), Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
         public IActionResult GetUsersSorted()
         {
@@ -77,12 +75,12 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            var users = _userRepository.GetUsersSorted();
+            var users = _userServices.GetUsersSorted();
             return Ok(users);
         }
 
         // GET api/<UserController>/{id}
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize]
         [ProducesResponseType(200, Type = typeof(User))]
         [ProducesResponseType(400)]
         public IActionResult GetUserById(string id)
@@ -94,21 +92,21 @@ namespace mpp_app_backend.Controllers
 
             try
             {
-                var user = _userRepository.GetUserById(id);
+                var user = _userServices.GetUserById(id);
                 return Ok(user);
             }
             catch (UserNotFoundException e)
             {
-                return NotFound();
+                return NotFound(e.Message);
             }
             catch (Exception e)
             {
-                return BadRequest();
+                return BadRequest(e.Message);
             }
         }
 
         // POST api/<UserController>
-        [HttpPost]
+        [HttpPost, Authorize]
         [ProducesResponseType(201, Type = typeof(User))]
         public IActionResult AddUser([FromBody] User user)
         {
@@ -117,25 +115,26 @@ namespace mpp_app_backend.Controllers
                 return BadRequest(ModelState);
             }
 
-            while (true)
-            {
-                try
-                {
-                    user.ID = Guid.NewGuid().ToString();
-                    _userRepository.AddUser(user);
-                    break;
-                }
-                catch (DbUpdateException e)
-                {
-                    continue;
-                }
-            }
-
+            _userServices.AddUser(user);
             return CreatedAtAction("GetUserById", new { id = user.ID }, user);
         }
 
+        // POST api/<UserController>/addRange
+        [HttpPost("addRange"), Authorize]
+        [ProducesResponseType(201, Type = typeof(IEnumerable<User>))]
+        public IActionResult AddUsers([FromBody] ICollection<User> users)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _userServices.AddUserRange(users);
+            return CreatedAtAction("GetUsers", users);
+        }
+
         // PUT api/<UserController>/{id}
-        [HttpPut("{id}")]
+        [HttpPut("{id}"), Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -148,8 +147,7 @@ namespace mpp_app_backend.Controllers
 
             try
             {
-                user.ID = id;
-                _userRepository.UpdateUser(user);
+                _userServices.UpdateUser(id, user);
                 return Ok();
             }
             catch (UserNotFoundException e)
@@ -163,7 +161,7 @@ namespace mpp_app_backend.Controllers
         }
 
         // DELETE api/<UserController>/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}"), Authorize]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         public IActionResult DeleteUser(string id)
@@ -175,7 +173,7 @@ namespace mpp_app_backend.Controllers
 
             try
             {
-                _userRepository.DeleteUser(id);
+                _userServices.DeleteUser(id);
                 return Ok();
             }
             catch (UserNotFoundException e)
@@ -184,12 +182,12 @@ namespace mpp_app_backend.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.InnerException.Message);
+                return BadRequest(e.Message);
             }
         }
 
         // GET api/<UserController>/getUsersPerYear
-        [HttpGet("getUsersPerYear")]
+        [HttpGet("getUsersPerYear"), Authorize]
         [ProducesResponseType(200, Type = typeof(IDictionary<int, int>))]
         public IActionResult GetUsersPerYear()
         {
@@ -200,6 +198,20 @@ namespace mpp_app_backend.Controllers
 
             var usersPerYear = _userServices.GetNumberOfUsersByRegistrationYear();
             return Ok(usersPerYear);
+        }
+
+        // POST api/<UserController>/{id}/loginActivity
+        [HttpPost("{id}/loginActivity"), Authorize]
+        [ProducesResponseType(201, Type = typeof(LoginActivity))]
+        public IActionResult AddLoginActivity(string id, [FromBody] LoginActivity loginActivity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _userServices.AddLoginActivity(id, loginActivity);
+            return CreatedAtAction("GetUserById", new { id = loginActivity.UserId }, loginActivity);
         }
     }
 }

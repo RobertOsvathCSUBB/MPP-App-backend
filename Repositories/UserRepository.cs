@@ -21,6 +21,12 @@ namespace mpp_app_backend.Repositories
             _context.SaveChanges();
         }
 
+        public void AddUserRange(ICollection<User> users)
+        {
+            _context.AddRange(users);
+            _context.SaveChanges();
+        }
+
         public void DeleteUser(string id)
         {
             var user = GetUserById(id);
@@ -38,19 +44,20 @@ namespace mpp_app_backend.Repositories
             return user;
         }
 
+        public ICollection<User> GetUsersPaginated(int offset, int pageSize)
+        {
+            int lastFetchedIndex = offset * pageSize;
+            ICollection<User> users = _context.Users
+                .OrderBy(user => user.TableIndex)
+                .Where(user => user.TableIndex > lastFetchedIndex)
+                .Take(pageSize)
+                .ToList();
+            return users;
+        }
+
         public ICollection<User> GetUsers()
         {
             return _context.Users.ToList();
-        }
-
-        public ICollection<User> GetUsersPaginated(int page, int pageSize)
-        {
-            return _context.Users.Skip(page * pageSize).Take(pageSize).ToList();
-        }
-
-        public ICollection<User> GetUsersSorted()
-        {
-            return _context.Users.OrderBy(user => user.Username).ToList();
         }
 
         public void UpdateUser(User user)

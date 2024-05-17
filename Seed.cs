@@ -1,6 +1,7 @@
 ﻿using mpp_app_backend.Models;
 using Bogus;
 using mpp_app_backend.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace mpp_app_backend
 {
@@ -16,7 +17,7 @@ namespace mpp_app_backend
         public void SeedDataContext()
         {
             var loginActivitiesFaker = new Faker<LoginActivity>();
-            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Uuid().ToString());
+            loginActivitiesFaker.RuleFor(loginActivity => loginActivity.ID, fake => fake.Random.Guid().ToString());
             loginActivitiesFaker.RuleFor(loginActivity => loginActivity.Time, fake => fake.Date.Past());
             loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Latitude, fake => fake.Random.Double());
             loginActivitiesFaker.RuleFor(LoginActivity => LoginActivity.Longitude, fake => fake.Random.Double());
@@ -34,8 +35,8 @@ namespace mpp_app_backend
 
             if (!_context.Users.Any())
             {
-                var users = usersFaker.Generate(100000);
-                Console.WriteLine(users);
+                var users = usersFaker.Generate(10);
+                _context.Database.SetCommandTimeout(300);
                 _context.Users.AddRange(users);
                 _context.SaveChanges();
             }
