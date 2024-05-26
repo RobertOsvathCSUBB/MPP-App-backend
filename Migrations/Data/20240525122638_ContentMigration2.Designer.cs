@@ -9,11 +9,11 @@ using mpp_app_backend.Context;
 
 #nullable disable
 
-namespace mpp_app_backend.Migrations
+namespace mpp_app_backend.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240516130731_ContentMigration")]
-    partial class ContentMigration
+    [Migration("20240525122638_ContentMigration2")]
+    partial class ContentMigration2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,10 @@ namespace mpp_app_backend.Migrations
                 {
                     b.Property<string>("ID")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AdminId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Avatar")
                         .IsRequired()

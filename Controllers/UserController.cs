@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Cors;
 using mpp_app_backend.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using mpp_app_backend.Context;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace mpp_app_backend.Controllers
 {
@@ -16,56 +19,67 @@ namespace mpp_app_backend.Controllers
     {
 
         private readonly IUserService _userServices;
+        private readonly AdminDataContext _adminContext;
 
-        public UserController(IUserService serv)
+        public UserController(IUserService serv, AdminDataContext adminContext)
         {
             _userServices = serv;
+            _adminContext = adminContext;
         }
 
-        // GET: api/<UserController>
-        [HttpGet, Authorize]
+        // GET: api/<UserController>?email={email}&domain={domain}
+        [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
-        public IActionResult GetUsers()
+        public IActionResult GetUsers(string email, string domain)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var users = _userServices.GetUsers();
+            var adminEmail = email + "@" + domain + ".com";
+            var adminID = _adminContext.Users.FirstOrDefault(admin => admin.Email == adminEmail).Id;
+
+            var users = _userServices.GetUsers(adminID);
             return Ok(users);
         }
 
-        // GET: api/<UserController>/totalUsersCount
+        // GET: api/<UserController>/totalUsersCount?email={email}&domain={domain}
         [HttpGet("totalUsersCount"), Authorize]
         [ProducesResponseType(200, Type = typeof(int))]
-        public IActionResult GetTotalUsersCount()
+        public IActionResult GetTotalUsersCount(string email, string domain)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var totalUsersCount = _userServices.GetTotalUsersCount();
+            var adminEmail = email + "@" + domain + ".com";
+            var adminID = _adminContext.Users.FirstOrDefault(admin => admin.Email == adminEmail).Id;
+
+            var totalUsersCount = _userServices.GetTotalUsersCount(adminID);
             return Ok(totalUsersCount);
         }
 
-        // GET: api/<UserController>/pages?page={page}&pageSize={pageSize}
+        // GET: api/<UserController>/pages?email={email}&domain={domain}&page={page}&pageSize={pageSize}
         [HttpGet("pages"), Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
-        public IActionResult GetUsersPaginated(int page, int pageSize)
+        public IActionResult GetUsersPaginated(string email, string domain, int page, int pageSize)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var users = _userServices.GetUsersPaginated(page, pageSize);
+            var adminEmail = email + "@" + domain + ".com";
+            var adminID = _adminContext.Users.FirstOrDefault(admin => admin.Email == adminEmail).Id;
+
+            var users = _userServices.GetUsersPaginated(adminID, page, pageSize);
             return Ok(users);
         }
 
         // GET: api/<UserController>/sorted
-        [HttpGet]
+        /*[HttpGet]
         [Route("sorted"), Authorize]
         [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
         public IActionResult GetUsersSorted()
@@ -77,7 +91,7 @@ namespace mpp_app_backend.Controllers
 
             var users = _userServices.GetUsersSorted();
             return Ok(users);
-        }
+        }*/
 
         // GET api/<UserController>/{id}
         [HttpGet("{id}"), Authorize]
@@ -105,21 +119,24 @@ namespace mpp_app_backend.Controllers
             }
         }
 
-        // POST api/<UserController>
+        // POST api/<UserController>?email={email}&domain={domain}
         [HttpPost, Authorize]
         [ProducesResponseType(201, Type = typeof(User))]
-        public IActionResult AddUser([FromBody] User user)
+        public IActionResult AddUser(string email, string domain, [FromBody] User user)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _userServices.AddUser(user);
+            var adminEmail = email + "@" + domain + ".com";
+            var adminID = _adminContext.Users.FirstOrDefault(admin => admin.Email == adminEmail).Id;
+
+            _userServices.AddUser(adminID, user);
             return CreatedAtAction("GetUserById", new { id = user.ID }, user);
         }
 
-        // POST api/<UserController>/addRange
+        /*// POST api/<UserController>/addRange
         [HttpPost("addRange"), Authorize]
         [ProducesResponseType(201, Type = typeof(IEnumerable<User>))]
         public IActionResult AddUsers([FromBody] ICollection<User> users)
@@ -131,7 +148,7 @@ namespace mpp_app_backend.Controllers
 
             _userServices.AddUserRange(users);
             return CreatedAtAction("GetUsers", users);
-        }
+        }*/
 
         // PUT api/<UserController>/{id}
         [HttpPut("{id}"), Authorize]
@@ -186,7 +203,7 @@ namespace mpp_app_backend.Controllers
             }
         }
 
-        // GET api/<UserController>/getUsersPerYear
+        /*// GET api/<UserController>/getUsersPerYear
         [HttpGet("getUsersPerYear"), Authorize]
         [ProducesResponseType(200, Type = typeof(IDictionary<int, int>))]
         public IActionResult GetUsersPerYear()
@@ -198,7 +215,7 @@ namespace mpp_app_backend.Controllers
 
             var usersPerYear = _userServices.GetNumberOfUsersByRegistrationYear();
             return Ok(usersPerYear);
-        }
+        }*/
 
         // POST api/<UserController>/{id}/loginActivity
         [HttpPost("{id}/loginActivity"), Authorize]

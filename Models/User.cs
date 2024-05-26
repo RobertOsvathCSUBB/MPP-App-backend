@@ -24,5 +24,8 @@ namespace mpp_app_backend.Models
         public DateTime RegisteredAt { get; set; }
 
         public virtual ICollection<LoginActivity>? LoginActivities { get; set; }
+
+        [ForeignKey("FK_User_AdminId")]
+        public string AdminId { get; set; }
     }
 }

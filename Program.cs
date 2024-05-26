@@ -13,6 +13,9 @@ using Microsoft.EntityFrameworkCore.Proxies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<Seed>();
 builder.Services.AddHealthChecks()
     .AddCheck<HealthCheck>("HealthCheck");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -60,7 +66,10 @@ builder.Services.AddDbContext<AdminDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+})
     .AddEntityFrameworkStores<AdminDataContext>();
 
 var app = builder.Build();
@@ -96,6 +105,8 @@ app.MapHealthChecks("/_health", new HealthCheckOptions
 app.MapIdentityApi<IdentityUser>();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

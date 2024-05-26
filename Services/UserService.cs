@@ -18,9 +18,9 @@ namespace mpp_app_backend.Services
             _loginActivityRepository = loginActivityRepository;
         }
 
-        public ICollection<User> GetUsers()
+        public ICollection<User> GetUsers(string adminID)
         {
-            return _userRepository.GetUsers();
+            return _userRepository.GetUsers(adminID);
         }
 
         public User GetUserById(string id)
@@ -28,28 +28,29 @@ namespace mpp_app_backend.Services
             return _userRepository.GetUserById(id);
         }
 
-        public int GetTotalUsersCount()
+        public int GetTotalUsersCount(string adminID)
         {
-            return _userRepository.GetUsers().Count;
+            return _userRepository.GetUsers(adminID).Count;
         }
 
-        public ICollection<User> GetUsersPaginated(int page, int pageSize)
+        public ICollection<User> GetUsersPaginated(string adminID, int page, int pageSize)
         {
-            return _userRepository.GetUsersPaginated(page, pageSize);
+            return _userRepository.GetUsersPaginated(adminID, page, pageSize);
         }
 
-        public ICollection<User> GetUsersSorted()
+        /*public ICollection<User> GetUsersSorted()
         {
             return _userRepository.GetUsers().OrderBy(user => user.Username).ToList();
-        }
+        }*/
 
-        public void AddUser(User user)
+        public void AddUser(string adminID, User user)
         {
             while (true)
             {
                 try
                 {
                     user.ID = Guid.NewGuid().ToString();
+                    user.AdminId = adminID;
                     _userRepository.AddUser(user);
                     break;
                 }
@@ -60,14 +61,14 @@ namespace mpp_app_backend.Services
             }
         }
 
-        public void AddUserRange(ICollection<User> users)
+        /*public void AddUserRange(ICollection<User> users)
         {
             foreach (User user in users)
             {
                 user.ID = Guid.NewGuid().ToString();
             }
             _userRepository.AddUserRange(users);
-        }
+        }*/
 
         public void UpdateUser(string id, User user)
         {
@@ -80,7 +81,7 @@ namespace mpp_app_backend.Services
             _userRepository.DeleteUser(id);
         }
 
-        public ICollection<IDictionary<string, int>> GetNumberOfUsersByRegistrationYear()
+        /*public ICollection<IDictionary<string, int>> GetNumberOfUsersByRegistrationYear()
         {
             ICollection<User> users = _userRepository.GetUsers();
             IDictionary<int, int> nrOfUsersByUniqueYears = new Dictionary<int, int>();
@@ -104,7 +105,7 @@ namespace mpp_app_backend.Services
                 result.Add(dict);
             }
             return result;
-        }
+        }*/
 
         public void AddLoginActivity(string userId, LoginActivity loginActivity)
         {

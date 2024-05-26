@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace mpp_app_backend.Migrations
+namespace mpp_app_backend.Migrations.Data
 {
     /// <inheritdoc />
-    public partial class ContentMigration : Migration
+    public partial class ContentMigration2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,11 +23,19 @@ namespace mpp_app_backend.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Avatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Birthdate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AdminId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_User_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade
+                    );
                 });
 
             migrationBuilder.CreateTable(

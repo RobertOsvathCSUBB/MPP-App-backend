@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace mpp_app_backend.Migrations.AdminData
+namespace mpp_app_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class LoginMigration : Migration
+    public partial class AdminDataMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

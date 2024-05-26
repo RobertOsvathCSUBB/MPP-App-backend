@@ -8,7 +8,7 @@ using mpp_app_backend.Context;
 
 #nullable disable
 
-namespace mpp_app_backend.Migrations
+namespace mpp_app_backend.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
     partial class DataContextModelSnapshot : ModelSnapshot
@@ -58,6 +58,10 @@ namespace mpp_app_backend.Migrations
                 {
                     b.Property<string>("ID")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AdminId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Avatar")
                         .IsRequired()

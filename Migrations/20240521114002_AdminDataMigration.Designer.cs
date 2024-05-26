@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using mpp_app_backend.Context;
 
 #nullable disable
 
-namespace mpp_app_backend.Migrations.AdminData
+namespace mpp_app_backend.Migrations
 {
     [DbContext(typeof(AdminDataContext))]
-    partial class AdminDataContextModelSnapshot : ModelSnapshot
+    [Migration("20240521114002_AdminDataMigration")]
+    partial class AdminDataMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
